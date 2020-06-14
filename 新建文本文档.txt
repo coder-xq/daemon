@@ -1,0 +1,81 @@
+OpenSSL 1.0.1f 
+gcc version 7.4.0
+
+#include <unistd.h>
+#include <stdio.h> 
+int main(void) 
+{
+int idx; 
+char *argv[][4] = { {"/bin/sh", "-c", "echo Hello 1", 0},
+		 {"/bin/sh", "-c", "echo Hello 2", 0}, 
+		{"/bin/sh", "-c", "echo Hello 3", 0} }; 
+for (idx = 0; idx < 3; idx++) 
+{
+ if (0 == fork()) continue; 
+ execve(argv[idx][0], &argv[idx][0], NULL);
+ fprintf(stderr, "Oops!\n"); 
+}
+ return 0; 
+} 
+
+shell方法
+#include <unistd.h> 
+#include <stdio.h> 
+int main(void) 
+{
+ char *argv[] = {"/bin/sh", "-c", "echo Hello 1 && echo Hello 2", 0};
+ execve(argv[0], &argv[0], NULL);
+ fprintf(stderr, "Oops!\n");
+ return 0;
+}
+
+
+	mov $0x0,%edx;        \n\t"
+            "push %edx;        \n\t"
+            "push $0x68736162;    \n\t"
+            "push $0x2f6e6962;    \n\t"
+            "push $0x2f2f2f2f;    \n\t"
+            "mov %esp,%ebx;        \n\t"
+            "push %edx;        \n\t"
+            "push %ebx;        \n\t"
+            "mov %esp,%ecx;        \n\t"
+            "mov $0xb,%eax;        \n\t"
+            "int $0x80;        \n\t"
+Alephl shellcode
+
+nasm -f elf retsh.asm
+ld -o retsh retsh.o
+./retsh
+
+global _start
+section .text
+ _start:
+    xor eax, eax
+    xor edx, edx
+    push eax
+    push 0x2f747874     ;echo 2019202210069 > xuqing.txt
+    push 0x2e676e69
+    push 0x71757820
+    push 0x3e203936
+    push 0x30303132
+    push 0x32303239
+    push 0x31303220
+    push 0x6f686365
+    mov esi, esp
+
+    push eax
+    push 0x632d2f2f     ;//-c
+    mov edi, esp
+
+    push eax
+    push 0x68732f2f     ;/bin//sh
+    push 0x6e69622f
+    mov ebx, esp
+
+    push edx
+    push esi
+    push edi
+    push ebx
+    mov ecx, esp
+    mov al,11
+    int 0x80
